@@ -1,11 +1,15 @@
 
+
 from nis import maps
+
+
 import requests, os, py7zr
 from datetime import datetime
 import pandas as pd 
+import gc 
 #download zipfile 
 
-dates = pd.date_range(start="2021-01-01", periods= 12,  freq="M")
+dates = pd.date_range(start="2017-08-01", periods= 50,  freq="M")
 
 months = dates.strftime("%Y%m")
 
@@ -20,14 +24,19 @@ for month in months:
         print('Request failed: %d' % response.status_code)
         #convert to dat file 
     with py7zr.SevenZipFile("import/zip/full"+month+".7z", 'r') as archive:
-        archive.extractall(path="C:/Users/ide/Documents/GitHub/YQ_Matrix-1/import/dat/")
+        archive.extractall(path="import/dat/")
             #convert dat file to list to csv to pandas 
     with open(r"import/dat/full"+month+".dat") as datFile: 
         test = [data.split()[0] for data in datFile]
     def Convert(string):
         li = string.split(",")
         return li
+
+
     test1 = [Convert(i) for i in test]
     df = pd.DataFrame(test1[1:], columns=[test1[0]])
-    final_df = df.drop(['PRODUCT_BEC'], axis=1,)
-    final_df.to_csv("export/nc"+month+".dat", sep = "|")
+    df = df.drop(['PRODUCT_BEC'], axis=1)
+    df.to_csv("export/nc"+month+".dat", sep = ",")
+    del df, test1, test
+    gc.collect()
+
